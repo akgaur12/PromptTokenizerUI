@@ -1,4 +1,4 @@
-import { apiClient, API_PREFIX } from "./client";
+import { apiClient, API_BASE_URL, API_PREFIX } from "./client";
 import type {
   HealthResponse,
   Model,
@@ -12,6 +12,24 @@ import type {
 export async function getHealth(): Promise<HealthResponse> {
   const { data } = await apiClient.get<HealthResponse>("/health");
   return data;
+}
+
+/**
+ * Fire-and-forget ping to /health to wake a sleeping Render free-tier dyno as
+ * early as possible (before React mounts). Errors are swallowed — this only
+ * exists to start the cold-start spin-up sooner; the HealthWidget reflects the
+ * real status once the app renders.
+ */
+export function prewarm(): void {
+  try {
+    void fetch(`${API_BASE_URL}/health`, {
+      method: "GET",
+      keepalive: true,
+      cache: "no-store",
+    }).catch(() => {});
+  } catch {
+    // Ignore — pre-warm is best-effort.
+  }
 }
 
 /**
