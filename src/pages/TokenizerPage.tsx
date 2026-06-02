@@ -69,7 +69,7 @@ export function TokenizerPage() {
         <Card>
           <CardContent className="space-y-5 p-5 sm:p-6">
             <div className="flex flex-wrap items-center gap-3">
-              <Label className="text-sm font-medium">Model</Label>
+              <Label className="text-sm font-bold">Model</Label>
               <div className="w-full max-w-xs">
                 <ModelSelector value={selected?.id} onChange={setSelected} />
               </div>
