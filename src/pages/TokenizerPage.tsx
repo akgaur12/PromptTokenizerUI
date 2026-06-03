@@ -108,7 +108,7 @@ export function TokenizerPage() {
 
       <footer className="border-t py-6">
         <div className="mx-auto max-w-6xl px-4 text-center text-xs text-muted-foreground sm:px-6">
-          © 2026 PromptTokenizer · Visualize and analyze LLM tokens · Created by
+          © 2026 PromptTokenizer · Visualize and analyze LLM tokens · Build by
           Akash Gaur
         </div>
       </footer>
