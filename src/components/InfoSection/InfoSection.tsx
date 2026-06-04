@@ -1,4 +1,4 @@
-import { BookOpen, Coins, Ruler, Sparkles, Tags } from "lucide-react";
+import { BookOpen, Coins, Gauge, Ruler, Sparkles, Tags } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 /** A single "term → definition" entry rendered as a titled card. */
@@ -81,6 +81,51 @@ export function InfoSection() {
           . It's only an estimate; the exact count depends on the model and the
           text itself, which is why the stats above are measured, not guessed.
         </p>
+      </Card>
+
+      <Card className="p-5">
+        <div className="flex items-center gap-2">
+          <Gauge className="h-4 w-4 text-violet-500" />
+          <h4 className="text-lg font-semibold tracking-tight">
+            Token-to-Word Ratio (tokens per word)
+          </h4>
+        </div>
+        <p className="mt-1.5 text-[16px] leading-relaxed text-muted-foreground">
+          How “expensive” your text is for an LLM. Clean English prose averages{" "}
+          <span className="font-medium text-foreground">~1.3 tokens/word</span> —
+          the higher the ratio, the more tokens each word costs.
+        </p>
+
+        <div className="mt-4 space-y-1.5">
+          {[
+            { range: "1.0–1.3", meaning: "Efficient prose", color: "bg-emerald-500" },
+            { range: "1.5–2.0", meaning: "Mixed prose + technical terms", color: "bg-sky-500" },
+            { range: "2.0–4.0", meaning: "Code-heavy or symbol-rich", color: "bg-amber-500" },
+            { range: "4.0+", meaning: "Non-Latin script or heavy special chars", color: "bg-rose-500" },
+          ].map((row) => (
+            <div
+              key={row.range}
+              className="flex items-center gap-3 rounded-md bg-muted/40 px-3 py-2 text-[15px]"
+            >
+              <span className={`h-2 w-2 shrink-0 rounded-full ${row.color}`} />
+              <span className="w-16 shrink-0 font-mono tabular-nums font-medium text-foreground">
+                {row.range}
+              </span>
+              <span className="text-muted-foreground">{row.meaning}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 grid gap-x-6 gap-y-1 text-[15px] leading-relaxed text-muted-foreground sm:grid-cols-2">
+          <p>
+            <span className="font-medium text-foreground">↑ Raises it:</span>{" "}
+            code, symbols, rare/technical words, non-Latin scripts, emoji.
+          </p>
+          <p>
+            <span className="font-medium text-foreground">↓ Lowers it:</span>{" "}
+            common short words and repetitive, familiar text.
+          </p>
+        </div>
       </Card>
 
       <Card className="p-5">

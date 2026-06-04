@@ -1,10 +1,4 @@
-import {
-  Coins,
-  Hash,
-  Type,
-  WholeWord,
-  type LucideIcon,
-} from "lucide-react";
+import { Coins, Hash, Type, WholeWord } from "lucide-react";
 import type { TokenizeResponse } from "@/types";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,8 +15,8 @@ interface StatsCardsProps {
 export function StatsCards({ data, isLoading, contextWindow }: StatsCardsProps) {
   if (isLoading && !data) {
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i} className="p-3.5">
             <Skeleton className="h-3 w-20" />
             <Skeleton className="mt-2.5 h-6 w-16" />
@@ -39,8 +33,20 @@ export function StatsCards({ data, isLoading, contextWindow }: StatsCardsProps) 
   // Only animate when there's a result — clearing should snap to zero.
   const animate = !!data;
 
+  // Tokens-per-word "efficiency" ratio — how many tokens each word costs the
+  // model. Only meaningful once we have a real token count from the backend.
+  const tokensPerWord =
+    data && data.word_count > 0 ? data.token_count / data.word_count : 0;
+
+  // Word density — what share of the tokens are whole words. The inverse of the
+  // ratio above, shown as a percentage (e.g. 31% means words fragment heavily).
+  const wordDensity =
+    data && data.token_count > 0
+      ? (data.word_count / data.token_count) * 100
+      : null;
+
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
       <NumberStat
         label="Total Tokens"
         value={data?.token_count ?? 0}
@@ -65,6 +71,12 @@ export function StatsCards({ data, isLoading, contextWindow }: StatsCardsProps) 
         accent="text-sky-500"
         tint="bg-sky-500/10"
       />
+      <RatioStat
+        label="Tokens / Word"
+        value={tokensPerWord}
+        animate={animate}
+        density={wordDensity}
+      />
       <CostStat
         label="Estimated Input Cost"
         value={data?.estimated_input_cost ?? null}
@@ -82,9 +94,33 @@ export function StatsCards({ data, isLoading, contextWindow }: StatsCardsProps) 
 
 interface BaseStatProps {
   label: string;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   accent: string;
   tint: string;
+}
+
+/** A λ (lambda) glyph for the tokens-per-word ratio card. */
+function TokensPerWordIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <text
+        x="12"
+        y="13"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize="24"
+        fontWeight="700"
+        fill="currentColor"
+      >
+        λ
+      </text>
+    </svg>
+  );
 }
 
 function StatShell({
@@ -121,10 +157,55 @@ function StatShell({
 function NumberStat({
   value,
   animate,
+  sub,
   ...rest
-}: BaseStatProps & { value: number; animate: boolean }) {
+}: BaseStatProps & {
+  value: number;
+  animate: boolean;
+  sub?: React.ReactNode;
+}) {
   const animated = useAnimatedNumber(value, animate);
-  return <StatShell {...rest}>{formatNumber(Math.round(animated))}</StatShell>;
+  return (
+    <StatShell {...rest} sub={sub}>
+      {formatNumber(Math.round(animated))}
+    </StatShell>
+  );
+}
+
+function RatioStat({
+  label,
+  value,
+  animate,
+  density,
+}: {
+  label: string;
+  value: number;
+  animate: boolean;
+  density: number | null;
+}) {
+  const animated = useAnimatedNumber(value, animate);
+  const available = value > 0;
+  return (
+    <StatShell
+      label={label}
+      icon={TokensPerWordIcon}
+      accent="text-violet-500"
+      tint="bg-violet-500/10"
+      sub={
+        available && density !== null ? (
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            {density.toFixed(0)}% word density
+          </p>
+        ) : null
+      }
+    >
+      {available ? (
+        animated.toFixed(2)
+      ) : (
+        <span className="text-sm font-medium text-muted-foreground">—</span>
+      )}
+    </StatShell>
+  );
 }
 
 function CostStat({
