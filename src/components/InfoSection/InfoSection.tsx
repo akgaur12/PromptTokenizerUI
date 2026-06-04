@@ -6,7 +6,7 @@ function Term({ title, children }: { title: string; children: React.ReactNode })
   return (
     <Card className="p-5">
       <h4 className="text-lg font-semibold tracking-tight">{title}</h4>
-      <p className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
+      <p className="mt-1.5 text-[16px] leading-relaxed text-muted-foreground">
         {children}
       </p>
     </Card>
@@ -30,7 +30,7 @@ export function InfoSection() {
         </h3>
       </div>
 
-      <div className="grid gap-4 text-[16px] sm:grid-cols-3">
+      <div className="grid text-[16px] gap-4 sm:grid-cols-3">
         <Term title="Tokenization">
           The process of breaking text into smaller units called <em>tokens</em>{" "}
           so that Large Language Models (LLMs) can understand and process the
@@ -56,7 +56,7 @@ export function InfoSection() {
             Why tokenization matters
           </h4>
         </div>
-        <p className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 text-[16px] leading-relaxed text-muted-foreground">
           Tokenization is a critical step in modern AI systems. The number of
           tokens in a prompt directly affects model context limits, processing
           speed, latency, and cost. Understanding how text is tokenized helps
@@ -72,7 +72,7 @@ export function InfoSection() {
             Tokens aren't words
           </h4>
         </div>
-        <p className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 text-[16px] leading-relaxed text-muted-foreground">
           A handy rule of thumb for English text: roughly{" "}
           <span className="font-medium text-foreground">~4 characters</span> or{" "}
           <span className="font-medium text-foreground">~0.75 words</span> per
@@ -90,11 +90,11 @@ export function InfoSection() {
             What affects token count
           </h4>
         </div>
-        <p className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 text-[16px] leading-relaxed text-muted-foreground">
           The same idea can cost very different numbers of tokens. Things that
           tend to increase the count:
         </p>
-        <ul className="mt-3 space-y-1.5 text-[17px] leading-relaxed text-muted-foreground">
+        <ul className="mt-3 space-y-1.5 text-[16px] leading-relaxed text-muted-foreground">
           <li>
             <span className="font-medium text-foreground">Whitespace</span> —
             leading spaces, tabs, and newlines are tokens too.
@@ -132,12 +132,12 @@ export function InfoSection() {
           <Tags className="h-4 w-4 text-emerald-500" />
           <h4 className="text-lg font-semibold tracking-tight">Special tokens</h4>
         </div>
-        <p className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 text-[16px] leading-relaxed text-muted-foreground">
           Beyond your text, models use reserved <em>special tokens</em> to mark
           structure. These are added automatically and still count toward your
           context window:
         </p>
-        <ul className="mt-3 space-y-1.5 text-[17px] leading-relaxed text-muted-foreground">
+        <ul className="mt-3 space-y-1.5 text-[16px] leading-relaxed text-muted-foreground">
           <li>
             <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
               &lt;|endoftext|&gt;
@@ -164,7 +164,7 @@ export function InfoSection() {
 
       <Card className="p-5">
         <h4 className="text-lg font-semibold tracking-tight">Example</h4>
-        <p className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 text-[16px] leading-relaxed text-muted-foreground">
           A subword tokenizer might split the sentence{" "}
           <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
             Tokenization is fun!
@@ -175,7 +175,7 @@ export function InfoSection() {
           {`Tokens:     ["Token", "ization", " is", " fun", "!"]
 Token IDs:  [ 11328,   1634,      374,    2523,   0 ]`}
         </pre>
-        <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground">
           Notice that <span className="font-medium">Tokenization</span> is broken
           into the subwords <span className="font-medium">Token</span> +{" "}
           <span className="font-medium">ization</span>, and that leading spaces
