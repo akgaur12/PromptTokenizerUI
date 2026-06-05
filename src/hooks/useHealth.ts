@@ -2,15 +2,20 @@ import { useQuery } from "@tanstack/react-query";
 import { getHealth } from "@/api/endpoints";
 import type { HealthResponse } from "@/types";
 
-/** Poll the service health endpoint every hour. */
+/**
+ * Poll the service health endpoint every 10 minutes to keep the backend
+ * warm so it doesn't drop to an idle/sleep state. `refetchIntervalInBackground`
+ * keeps the keep-alive ping firing even when the tab isn't focused.
+ */
 export function useHealth() {
   return useQuery<HealthResponse>({
     queryKey: ["health"],
     queryFn: getHealth,
-    refetchInterval: 3_600_000,
+    refetchInterval: 600_000, // 10 minutes (600,000ms)
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
     retry: 1,
-    staleTime: 10_000,
+    staleTime: 10_000, // 10 seconds (10,000ms)
   });
 }
 

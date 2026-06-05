@@ -12,7 +12,7 @@ export const API_PREFIX = "/api/v1";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30_000,
+  timeout: 30_000, // Request timeout: 30 seconds (30,000ms)
   headers: {
     "Content-Type": "application/json",
   },
