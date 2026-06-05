@@ -31,7 +31,7 @@ export function Header() {
           <img
             src="/banner.png"
             alt="PromptTokenizer logo"
-            className="h-14 w-70 shrink-0 rounded-xl"
+            className="h-10 w-auto shrink-0 rounded-xl sm:h-14"
           />
           {/* <div className="leading-tight">
             <h1 className="text-base font-semibold tracking-tight sm:text-lg">
