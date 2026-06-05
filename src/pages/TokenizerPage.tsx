@@ -4,7 +4,7 @@ import { ModelSelector } from "@/components/ModelSelector/ModelSelector";
 import { PromptInput } from "@/components/PromptInput/PromptInput";
 import { StatsCards } from "@/components/StatsCards/StatsCards";
 import { TokenViewer } from "@/components/TokenViewer/TokenViewer";
-import { InfoSection } from "@/components/InfoSection/InfoSection";
+import { LandingContent } from "@/components/LandingContent/LandingContent";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useModels } from "@/hooks/useModels";
@@ -102,8 +102,8 @@ export function TokenizerPage() {
           <TokenViewer data={result} />
         </div>
 
-        {/* Educational info — concepts + a worked example */}
-        <InfoSection />
+        {/* Static, crawlable landing copy + tokenization explainer for SEO */}
+        <LandingContent />
       </main>
 
       <footer className="border-t py-6">
