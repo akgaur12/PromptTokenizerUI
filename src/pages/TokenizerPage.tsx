@@ -4,6 +4,7 @@ import { ModelSelector } from "@/components/ModelSelector/ModelSelector";
 import { PromptInput } from "@/components/PromptInput/PromptInput";
 import { StatsCards } from "@/components/StatsCards/StatsCards";
 import { TokenViewer } from "@/components/TokenViewer/TokenViewer";
+import { TokenTables } from "@/components/TokenTables/TokenTables";
 import { LandingContent } from "@/components/LandingContent/LandingContent";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -100,6 +101,8 @@ export function TokenizerPage() {
           />
 
           <TokenViewer data={result} />
+
+          <TokenTables data={result} />
         </div>
 
         {/* Static, crawlable landing copy + tokenization explainer for SEO */}
