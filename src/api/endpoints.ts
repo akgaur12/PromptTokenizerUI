@@ -1,5 +1,7 @@
 import { apiClient, API_BASE_URL, API_PREFIX } from "./client";
 import type {
+  CompareRequest,
+  CompareResponse,
   HealthResponse,
   Model,
   ModelsResponse,
@@ -76,6 +78,17 @@ export async function tokenize(
 ): Promise<TokenizeResponse> {
   const { data } = await apiClient.post<TokenizeResponse>(
     `${API_PREFIX}/tokenize`,
+    body,
+  );
+  return data;
+}
+
+/** POST /api/v1/compare — tokenize one text across several models at once. */
+export async function compare(
+  body: CompareRequest,
+): Promise<CompareResponse> {
+  const { data } = await apiClient.post<CompareResponse>(
+    `${API_PREFIX}/compare`,
     body,
   );
   return data;

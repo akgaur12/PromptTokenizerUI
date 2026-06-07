@@ -83,6 +83,32 @@ export interface TokenizeResponse {
 }
 
 /* ------------------------------------------------------------------ */
+/* Compare                                                             */
+/* ------------------------------------------------------------------ */
+
+export interface CompareRequest {
+  /** Model ids to tokenize the same text with, e.g. ["gpt-5", "gpt-5-mini"]. */
+  models: string[];
+  text: string;
+}
+
+/** Per-model entry in a compare response. */
+export interface CompareResult {
+  model: string;
+  /** The tokenizer the backend resolved this model to, e.g. "o200k_base". */
+  resolved_tokenizer?: string | null;
+  token_count: number | null;
+  /** Populated when this particular model failed (others may still succeed). */
+  error?: string | null;
+}
+
+export interface CompareResponse {
+  /** Character length of the compared text. */
+  text_length: number;
+  results: CompareResult[];
+}
+
+/* ------------------------------------------------------------------ */
 /* Health                                                              */
 /* ------------------------------------------------------------------ */
 

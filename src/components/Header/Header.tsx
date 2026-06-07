@@ -7,6 +7,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useHashRoute } from "@/hooks/useHashRoute";
+import { cn } from "@/lib/utils";
+
+const NAV_ITEMS = [
+  { href: "#/", label: "Tokenize", match: (r: string) => !r.startsWith("/compare") },
+  { href: "#/compare", label: "Compare", match: (r: string) => r.startsWith("/compare") },
+];
 
 function MediumIcon({ className }: { className?: string }) {
   return (
@@ -23,24 +30,40 @@ function MediumIcon({ className }: { className?: string }) {
 }
 
 export function Header() {
+  const route = useHashRoute();
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:gap-5">
           {/* Logo */}
           <img
             src="/banner.png"
             alt="PromptTokenizer logo"
             className="h-10 w-auto shrink-0 rounded-xl sm:h-14"
           />
-          {/* <div className="leading-tight">
-            <h1 className="text-base font-semibold tracking-tight sm:text-lg">
-              PromptTokenizer
-            </h1>
-            <p className="hidden text-xs text-muted-foreground sm:block">
-              Visualize and analyze LLM tokens
-            </p>
-          </div> */}
+
+          {/* Primary navigation */}
+          <nav className="flex items-center gap-1">
+            {NAV_ITEMS.map((item) => {
+              const active = item.match(route);
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors sm:px-3",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
+          </nav>
         </div>
 
         <div className="flex items-center gap-2">

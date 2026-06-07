@@ -13,6 +13,10 @@ interface PromptInputProps {
   onClear: () => void;
   isLoading: boolean;
   disabled?: boolean;
+  /** Label on the primary action button (default "Tokenize"). */
+  actionLabel?: string;
+  /** Label shown while the action is in flight (default "Tokenizing…"). */
+  loadingLabel?: string;
 }
 
 const MAX_AUTO_HEIGHT = 200; // px — beyond this the textarea scrolls
@@ -25,6 +29,8 @@ export function PromptInput({
   onClear,
   isLoading,
   disabled,
+  actionLabel = "Tokenize",
+  loadingLabel = "Tokenizing…",
 }: PromptInputProps) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -93,7 +99,7 @@ export function PromptInput({
           <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
             Enter
           </kbd>{" "}
-          to tokenize
+          to {actionLabel.toLowerCase()}
         </p>
         <div className="ml-auto flex items-center gap-2">
           {value.length > 0 ? (
@@ -121,12 +127,12 @@ export function PromptInput({
             {isLoading ? (
               <>
                 <Loader2 className="animate-spin" />
-                Tokenizing…
+                {loadingLabel}
               </>
             ) : (
               <>
                 <Sparkles />
-                Tokenize
+                {actionLabel}
               </>
             )}
           </Button>
