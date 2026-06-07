@@ -15,7 +15,7 @@ interface PromptInputProps {
   disabled?: boolean;
 }
 
-const MAX_AUTO_HEIGHT = 300; // px — beyond this the textarea scrolls
+const MAX_AUTO_HEIGHT = 200; // px — beyond this the textarea scrolls
 
 export function PromptInput({
   value,

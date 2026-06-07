@@ -13,7 +13,7 @@ interface TokenBlocksProps {
 // Soft cap so pathologically large inputs don't freeze the DOM.
 const INITIAL_CAP = 5000;
 // Max height of the scrollable token area before it scrolls internally.
-const MAX_AUTO_HEIGHT = 360; // px
+const MAX_AUTO_HEIGHT = 300; // px
 
 export function TokenBlocks({ tokens, tokenIds }: TokenBlocksProps) {
   const [showAll, setShowAll] = useState(false);

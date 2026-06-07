@@ -12,7 +12,7 @@ interface TokenIdChipsProps {
 
 const INITIAL_CAP = 5000;
 // Max height of the scrollable chip area before it scrolls internally.
-const MAX_AUTO_HEIGHT = 360; // px
+const MAX_AUTO_HEIGHT = 300; // px
 
 export function TokenIdChips({ tokens, tokenIds }: TokenIdChipsProps) {
   const [showAll, setShowAll] = useState(false);
