@@ -34,39 +34,47 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <div className="flex items-center gap-3 sm:gap-5">
-          {/* Logo */}
-          <img
-            src="/banner.png"
-            alt="PromptTokenizer logo"
-            className="h-10 w-auto shrink-0 rounded-xl sm:h-14"
-          />
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="flex h-16 items-center justify-between gap-2 sm:gap-5">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-5">
+            {/* Logo — compact square icon on mobile, full banner on sm+ */}
+            <a href="#/" aria-label="PromptTokenizer home" className="shrink-0">
+              <img
+                src="/favicon.svg"
+                alt="PromptTokenizer logo"
+                className="h-9 w-9 rounded-lg sm:hidden"
+              />
+              <img
+                src="/banner.png"
+                alt="PromptTokenizer logo"
+                className="hidden h-14 w-auto rounded-xl sm:block"
+              />
+            </a>
 
-          {/* Primary navigation */}
-          <nav className="flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
-              const active = item.match(route);
-              return (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors sm:px-3",
-                    active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  {item.label}
-                </a>
-              );
-            })}
-          </nav>
-        </div>
+            {/* Navigation — inline beside the logo */}
+            <nav className="flex items-center gap-0.5 sm:gap-1">
+              {NAV_ITEMS.map((item) => {
+                const active = item.match(route);
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "rounded-md px-2 py-1.5 text-sm font-medium transition-colors sm:px-3",
+                      active
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
+            </nav>
+          </div>
 
-        <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
           <HealthWidget />
           <Tooltip>
             <TooltipTrigger asChild>
@@ -107,6 +115,7 @@ export function Header() {
             <TooltipContent>Read on Medium</TooltipContent>
           </Tooltip>
           <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>
