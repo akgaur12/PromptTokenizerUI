@@ -4,7 +4,7 @@ import type { CompareResponse, Model } from "@/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn, formatNumber } from "@/lib/utils";
+import { formatCost, formatNumber } from "@/lib/utils";
 
 interface CompareResultsProps {
   data?: CompareResponse;
@@ -18,12 +18,14 @@ interface Row {
   name: string;
   tokenizer: string | null;
   tokenCount: number | null;
+  /** Estimated input cost in `currency`; null when unavailable or failed. */
+  cost: number | null;
+  currency: string;
   error: string | null;
   /** 1-based position among successful rows; null for failed ones. */
   rank: number | null;
   /** Percentage more tokens than the most efficient model (0 for the best). */
   deltaPct: number | null;
-  isBest: boolean;
 }
 
 /**
@@ -44,11 +46,11 @@ export function CompareResults({
     const nameOf = (id: string) =>
       models?.find((m) => m.id === id)?.name ?? id;
 
-    const counts = data.results
-      .filter((r) => typeof r.token_count === "number" && !r.error)
-      .map((r) => r.token_count as number);
+    const okResults = data.results.filter(
+      (r) => typeof r.token_count === "number" && !r.error,
+    );
+    const counts = okResults.map((r) => r.token_count as number);
     const min = counts.length ? Math.min(...counts) : 0;
-    const hasSpread = counts.length > 1;
 
     const sorted = [...data.results].sort((a, b) => {
       const av = typeof a.token_count === "number" && !a.error ? a.token_count : Infinity;
@@ -63,15 +65,20 @@ export function CompareResults({
       if (ok) rank += 1;
       const deltaPct =
         ok && min > 0 ? ((count as number) - min) / min * 100 : ok ? 0 : null;
+      const cost =
+        ok && typeof r.estimated_input_cost === "number"
+          ? r.estimated_input_cost
+          : null;
       return {
         model: r.model,
         name: nameOf(r.model),
         tokenizer: r.resolved_tokenizer ?? null,
         tokenCount: count,
+        cost,
+        currency: r.cost_currency ?? "USD",
         error: r.error ?? null,
         rank: ok ? rank : null,
         deltaPct,
-        isBest: hasSpread && ok && count === min,
       };
     });
   }, [data, models]);
@@ -105,7 +112,7 @@ export function CompareResults({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/30 px-5 py-3 sm:px-6">
         <div className="flex items-center gap-2 text-sm font-semibold">
           <Table2 className="h-4 w-4 text-primary" />
-          Token comparison
+          Token &amp; price comparison
         </div>
         <div className="text-xs text-muted-foreground">
           <span className="font-medium text-foreground">
@@ -132,6 +139,9 @@ export function CompareResults({
                 Tokens
               </th>
               <th className="px-3 py-2.5 text-right font-medium sm:px-4">
+                Est. cost
+              </th>
+              <th className="hidden px-3 py-2.5 text-right font-medium sm:table-cell sm:px-4">
                 vs best
               </th>
             </tr>
@@ -140,10 +150,7 @@ export function CompareResults({
             {rows.map((row) => (
               <tr
                 key={row.model}
-                className={cn(
-                  "transition-colors hover:bg-muted/40",
-                  row.isBest && "bg-success/5",
-                )}
+                className="transition-colors hover:bg-muted/40"
               >
                 <td className="px-3 py-3 text-center tabular-nums text-muted-foreground sm:px-4">
                   {row.rank ?? "—"}
@@ -151,7 +158,6 @@ export function CompareResults({
                 <td className="px-3 py-3 sm:px-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">{row.name}</span>
-                    {row.isBest && <Badge variant="success">Best</Badge>}
                   </div>
                   {/* Tokenizer shown inline on mobile, where its column is hidden. */}
                   {row.tokenizer && (
@@ -184,7 +190,16 @@ export function CompareResults({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-3 text-right tabular-nums sm:px-4">
+                <td className="px-3 py-3 text-right sm:px-4">
+                  {row.cost !== null ? (
+                    <span className="font-semibold tabular-nums">
+                      {formatCost(row.cost, row.currency)}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
+                <td className="hidden px-3 py-3 text-right tabular-nums sm:table-cell sm:px-4">
                   {row.tokenCount === null ? (
                     <span className="text-muted-foreground">—</span>
                   ) : row.deltaPct === 0 ? (
@@ -201,8 +216,10 @@ export function CompareResults({
         </table>
       </div>
 
-      {/* Legend explaining the "vs best" column. */}
+      {/* Legend explaining the "Est. cost" and "vs best" columns. */}
       <p className="border-t bg-muted/30 px-5 py-2.5 text-xs text-muted-foreground sm:px-6">
+        <span className="font-medium text-foreground">Est. cost:</span> estimated
+        cost of this text as input.{" "}
         <span className="font-medium text-foreground">vs best:</span> the winner
         shows <span className="font-medium text-success">best</span>; every other
         model shows{" "}

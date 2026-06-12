@@ -69,6 +69,8 @@ export interface TokenizeRequest {
 
 export interface TokenizeResponse {
   model?: string;
+  /** The tokenizer the backend resolved this model to, e.g. "o200k_base". */
+  resolved_tokenizer?: string | null;
   token_count: number;
   word_count: number;
   character_count: number;
@@ -98,6 +100,10 @@ export interface CompareResult {
   /** The tokenizer the backend resolved this model to, e.g. "o200k_base". */
   resolved_tokenizer?: string | null;
   token_count: number | null;
+  /** Estimated cost of tokenizing this text as input, in `cost_currency`. */
+  estimated_input_cost?: number | null;
+  /** Currency for `estimated_input_cost`, e.g. "USD". */
+  cost_currency?: string | null;
   /** Populated when this particular model failed (others may still succeed). */
   error?: string | null;
 }
@@ -106,6 +112,41 @@ export interface CompareResponse {
   /** Character length of the compared text. */
   text_length: number;
   results: CompareResult[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Compare prompts (one model, several prompts)                        */
+/* ------------------------------------------------------------------ */
+
+export interface ComparePromptsRequest {
+  /** The single model to tokenize every prompt with, e.g. "gpt-4o". */
+  model: string;
+  /** The prompts to compare against each other (typically two). */
+  prompts: string[];
+}
+
+/** Per-prompt entry in a "compare prompts" response. */
+export interface PromptCompareResult {
+  /** 0-based position of this prompt in the request. */
+  index: number;
+  /** Character length of this prompt. */
+  text_length: number;
+  word_count: number | null;
+  token_count: number | null;
+  /** Estimated cost of tokenizing this prompt as input, in `cost_currency`. */
+  estimated_input_cost?: number | null;
+  /** Currency for `estimated_input_cost`, e.g. "USD". */
+  cost_currency?: string | null;
+  /** Populated when this particular prompt failed. */
+  error?: string | null;
+}
+
+export interface ComparePromptsResponse {
+  /** The model every prompt was tokenized with. */
+  model: string;
+  /** The tokenizer the backend resolved this model to. */
+  resolved_tokenizer?: string | null;
+  results: PromptCompareResult[];
 }
 
 /* ------------------------------------------------------------------ */
