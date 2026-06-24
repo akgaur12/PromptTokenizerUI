@@ -66,7 +66,8 @@ modern UI inspired by Linear / Vercel / Stripe.
 | Token blocks viewer | `TokenViewer` / `TokenBlocks` | Pastel blocks, whitespace visualized, click-to-copy, hover info |
 | Token ID chips viewer | `TokenIdChips` | Click to copy, hover reveals original token, "copy all" |
 | Insight tables | `TokenTables` | Top-10 expensive words & top-10 frequent tokens |
-| Multi-model comparison | `CompareResults` | Ranked table, "best" flag, "+X% vs best" |
+| Compare across models | `CompareResults` | Ranked table by tokens **and est. cost**, "+X% vs best" |
+| Compare across prompts | `ComparePromptsResults` | Two prompts, one model, side-by-side token/cost cards (added `7e0b235`) |
 | Raw JSON viewer | `JsonViewer` | Collapsible, syntax-highlighted, copyable (available component) |
 | Health widget | `HealthWidget` | Status dot + version + RSS/VMS memory |
 | Dark / light theme | `theme-provider` / `ThemeToggle` | Defaults to dark, follows system |

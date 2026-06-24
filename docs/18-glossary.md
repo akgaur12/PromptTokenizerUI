@@ -73,8 +73,18 @@ the backend awake while a tab is open.
 **Resolved tokenizer** — In Compare results, the actual tokenizer the backend
 mapped a model to (`resolved_tokenizer`), shown per row.
 
-**"vs best"** — In Compare, each model's percentage of extra tokens relative to
-the most efficient (lowest-count) model; the best shows `best`.
+**Compare modes** — The Compare page has two modes (added `7e0b235`): **Across
+models** (one text, several models — which tokenizer is most efficient/cheapest)
+and **Across prompts** (one model, two prompts — which prompt costs fewer
+tokens). Both are composed client-side from `/tokenize` calls.
+
+**"vs best"** — In the across-models comparison, each model's percentage of extra
+tokens relative to the most efficient (lowest-count) model; the best shows
+`best`. (Column hidden on mobile — see ISSUE-003.)
+
+**Fewest tokens** — In the across-prompts comparison, the flag on the prompt with
+the lowest token count; the other prompt shows how many more tokens (and what %)
+it costs.
 
 ## Technical / stack terms
 
@@ -86,10 +96,11 @@ so navigation never hits the server. Implemented in `useHashRoute`.
 
 **React Query (TanStack Query)** — The server-state library handling fetching,
 caching, retries, and background refetch. Queries (`useModels`, `useHealth`) vs
-mutations (`useTokenize`, `useCompare`).
+mutations (`useTokenize`, `useCompare`, `useComparePrompts`).
 
 **Query / Mutation** — React Query terms: a *query* reads/caches data; a
-*mutation* performs a write/action (here, the tokenize/compare POSTs).
+*mutation* performs a write/action (here, the tokenize POSTs, including the
+compare fan-outs).
 
 **shadcn/ui** — A pattern of copying accessible, Radix-based component primitives
 into the repo (`src/components/ui/*`) and styling them with Tailwind, rather than

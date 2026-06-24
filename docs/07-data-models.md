@@ -48,6 +48,7 @@ classDiagram
     }
     class TokenizeResponse {
         +string? model
+        +string? resolved_tokenizer
         +number token_count
         +number word_count
         +number character_count
@@ -66,6 +67,8 @@ classDiagram
         +string model
         +string? resolved_tokenizer
         +number|null token_count
+        +number? estimated_input_cost
+        +string? cost_currency
         +string? error
     }
     class CompareResponse {
@@ -73,6 +76,26 @@ classDiagram
         +CompareResult[] results
     }
     CompareResponse o-- CompareResult
+
+    class ComparePromptsRequest {
+        +string model
+        +string[] prompts
+    }
+    class PromptCompareResult {
+        +number index
+        +number text_length
+        +number|null word_count
+        +number|null token_count
+        +number? estimated_input_cost
+        +string? cost_currency
+        +string? error
+    }
+    class ComparePromptsResponse {
+        +string model
+        +string? resolved_tokenizer
+        +PromptCompareResult[] results
+    }
+    ComparePromptsResponse o-- PromptCompareResult
 
     class HealthResponse {
         +string status
@@ -116,17 +139,38 @@ invariant: when present, `tokens[i]` and `token_ids[i]` describe the **same
 token** — all token-viewer and table logic depends on this positional
 alignment.
 
-## Compare
+`TokenizeResponse` gained **`resolved_tokenizer`** in `7e0b235` — the tokenizer
+the backend resolved the model to. Both compare features read this field (it is
+the value they surface as each row's "Tokenizer").
+
+## Compare across models
 
 ### `CompareRequest` / `CompareResult` / `CompareResponse`
-See [API Integration](./06-api-integration.md#post-apiv1compare). `CompareResult`
-encodes **per-model success or failure**: a number `token_count` + null `error`
-means success; null `token_count` + a string `error` means that one model
-failed while others may have succeeded.
+See [API Integration](./06-api-integration.md#compare--client-side-composition).
+These are assembled **client-side** from per-model `/tokenize` calls (not a
+backend `/compare` endpoint). `CompareResult` encodes **per-model success or
+failure**: a number `token_count` + null `error` means success; null
+`token_count` + a string `error` means that one model failed while others may
+have succeeded. As of `7e0b235`, `CompareResult` also carries
+`estimated_input_cost` and `cost_currency` so the table can rank by price.
+
+## Compare across prompts (added `7e0b235`)
+
+### `ComparePromptsRequest` / `PromptCompareResult` / `ComparePromptsResponse`
+The mirror of the across-models types: the **model is fixed and the prompts
+vary**. `ComparePromptsRequest` is `{ model, prompts[] }`. Each
+`PromptCompareResult` carries the prompt's 0-based `index`, `text_length`,
+`word_count`, `token_count`, cost fields, and an inline `error`.
+`ComparePromptsResponse` echoes the `model` and the `resolved_tokenizer` shared
+by all prompts. See
+[API Integration](./06-api-integration.md#comparepromptsbody--one-model-several-prompts-endpointsts).
 
 ### `Row` (`src/components/CompareResults/CompareResults.tsx`)
-A view model derived from `CompareResult[]` adding `rank`, `deltaPct`, `isBest`,
-and a resolved display `name`. Not part of the API contract.
+A view model derived from `CompareResult[]` adding `rank`, `deltaPct`, a
+resolved display `name`, and (since `7e0b235`) `cost` + `currency`. The previous
+`isBest` flag was **removed** in `7e0b235` — the table no longer highlights a
+"best" row, relying on the `vs best` column instead. Not part of the API
+contract.
 
 ## Health
 
@@ -157,8 +201,9 @@ cross the API boundary:
 | Type | File | Role |
 | ---- | ---- | ---- |
 | `ModelGroup` | `useModels.ts` | Grouped dropdown data |
-| `CompareSession` | `useCompareSession.ts` | Hoisted Compare state bundle |
-| `Row` | `CompareResults.tsx` | Ranked comparison rows |
+| `CompareMode` | `useCompareSession.ts` | `"models" \| "prompts"` — which compare the page shows (added `7e0b235`) |
+| `CompareSession` | `useCompareSession.ts` | Hoisted Compare state bundle — now holds **both** modes' state (added `7e0b235`) |
+| `Row` | `CompareResults.tsx` | Ranked comparison rows (now with `cost`/`currency`, no `isBest`) |
 | `WordSegment`, `ExpensiveWord`, `FrequentToken` | `TokenTables.tsx` | Analytics rows |
 | `TokenInfo`, `TooltipState` | `HoverTooltip.tsx` | Tooltip payload |
 | `TokenColor` | `token-colors.ts` | Palette entry |

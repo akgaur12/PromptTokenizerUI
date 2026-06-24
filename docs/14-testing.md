@@ -39,21 +39,35 @@ Run `npm run dev` with the API reachable, then verify:
 9. **Clear** — empties input and snaps stats to zero (no count-down animation).
 10. **Large input** — paste >5000 tokens; the "Show all" cap appears.
 
-### Compare page
+### Compare page — across models
 11. **< 2 models** — Compare shows the "pick at least two" toast.
-12. **Ranked results** — successful rows sort ascending, "Best" flagged, "+X%"
-    shown; a bad model id sinks to the bottom as "Failed".
-13. **State persistence** — navigate Tokenize ↔ Compare; selected models + text
-    persist.
+12. **Ranked results** — successful rows sort ascending, "+X% vs best" shown,
+    **Est. cost** column populated (or `—` when unavailable); a bad model id
+    sinks to the bottom as "Failed".
+13. **Many requests** — confirm one `/tokenize` request fires per selected model
+    (Network tab), and partial failures don't sink the others.
+
+### Compare page — across prompts (added `7e0b235`)
+14. **Mode toggle** — switching "Across models" ↔ "Across prompts" preserves
+    each mode's separate input.
+15. **Validation** — empty model or either prompt empty → the matching toast
+    ("Pick a model" / "Enter both prompts").
+16. **Results** — both prompts render as cards with token count, est. cost, word
+    and char counts; the leaner prompt gets the "fewest tokens" trophy and the
+    other shows `+N tokens → +X%`.
+
+### Compare page — shared
+17. **State persistence** — navigate Tokenize ↔ Compare; selections, text, and
+    both prompts persist.
 
 ### Cross-cutting
-14. **Theme** — toggle light/dark; no flash; preference persists on reload.
-15. **Offline API** — stop the API; health dot turns red, tokenize shows the
+18. **Theme** — toggle light/dark; no flash; preference persists on reload.
+19. **Offline API** — stop the API; health dot turns red, tokenize shows the
     "Can't reach the server" toast, model load shows Retry.
-16. **Reduced motion** — with OS reduced-motion on, numbers snap instead of
+20. **Reduced motion** — with OS reduced-motion on, numbers snap instead of
     animating.
-17. **Responsive** — check mobile widths (logo swap, stats grid, compare column
-    hiding).
+21. **Responsive** — check mobile widths (logo swap, stats grid, compare column
+    hiding; note the missing best-marker on mobile — ISSUE-003).
 
 ## Recommended automated strategy
 
@@ -72,6 +86,7 @@ The pure logic functions are the best ROI and have zero React/DOM dependencies:
 | ------ | ---- | -------------- |
 | `normalizeApiError` | `api/client.ts` | status→code mapping, body-code precedence, network case |
 | `normalizeModel` | `api/endpoints.ts` | field mapping, deprecated derivation, fallbacks |
+| `compare` / `comparePrompts` fan-out | `api/endpoints.ts` | one `/tokenize` per item, inline per-item error capture, cost/tokenizer mapping, `text_length` derivation (see ISSUE-002) |
 | `groupModelsByFamily` | `hooks/useModels.ts` | grouping + first-appearance ordering |
 | `computeExpensiveWords` / `computeFrequentTokens` | `components/TokenTables` | counts, top-N, tie-breaking, multi-token words |
 | `formatNumber/Cost/Mb`, `countWords` | `lib/utils.ts` | precision, null/NaN → `—`, currency fallback |
@@ -83,8 +98,9 @@ Suggested tooling: **Vitest** (integrates natively with Vite) +
 
 ### 2. Component tests
 Render `ModelSelector`, `PromptInput`, `TokenViewer`, `CompareResults`,
-`StatsCards` with mocked React Query data and assert loading/empty/error/success
-states and key interactions (submit shortcut, copy, toggle, retry).
+`ComparePromptsResults`, `StatsCards` with mocked React Query data and assert
+loading/empty/error/success states and key interactions (submit shortcut, copy,
+toggle, retry, the compare mode toggle).
 
 ### 3. End-to-end
 A couple of Playwright flows (tokenize happy path; compare with a partial

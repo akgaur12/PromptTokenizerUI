@@ -52,15 +52,16 @@ src/
 ├── hooks/
 │   ├── useModels.ts        # GET /models + grouping helpers
 │   ├── useTokenize.ts      # POST /tokenize mutation
-│   ├── useCompare.ts       # POST /compare mutation
-│   ├── useCompareSession.ts# Hoisted Compare-page state
+│   ├── useCompare.ts       # compare() — fan-out /tokenize across models
+│   ├── useComparePrompts.ts# comparePrompts() — fan-out /tokenize across prompts
+│   ├── useCompareSession.ts# Hoisted Compare-page state (both modes)
 │   ├── useHealth.ts        # GET /health polling + helpers
 │   ├── useHashRoute.ts     # Hash-based routing
 │   └── useAnimatedNumber.ts# rAF count-up animation
 │
 ├── pages/
 │   ├── TokenizerPage.tsx   # Main tokenize experience
-│   └── ComparePage.tsx     # Multi-model comparison
+│   └── ComparePage.tsx     # Compare: across-models & across-prompts modes
 │
 ├── components/
 │   ├── Header/Header.tsx
@@ -77,7 +78,9 @@ src/
 │   │   ├── TokenIdChips.tsx          # Token ID chips
 │   │   └── HoverTooltip.tsx          # Shared floating tooltip
 │   ├── TokenTables/TokenTables.tsx   # Expensive words / frequent tokens
-│   ├── CompareResults/CompareResults.tsx
+│   ├── CompareResults/
+│   │   ├── CompareResults.tsx        # Across-models table (tokens + cost)
+│   │   └── ComparePromptsResults.tsx # Across-prompts cards
 │   ├── JsonViewer/
 │   │   ├── JsonViewer.tsx            # Collapsible JSON panel
 │   │   └── highlight.tsx             # Dependency-free JSON highlighter

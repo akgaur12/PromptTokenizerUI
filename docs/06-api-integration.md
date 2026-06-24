@@ -32,13 +32,25 @@ export const apiClient = axios.create({
 
 ## Endpoint catalog
 
-| Method | Path | Wrapper (`endpoints.ts`) | Hook | Used by |
-| ------ | ---- | ------------------------ | ---- | ------- |
+There are **only four real backend endpoints**. The two "compare" features are
+*not* backed by dedicated endpoints — they are composed client-side by fanning
+out parallel `/api/v1/tokenize` calls (see
+[Compare — client-side composition](#compare--client-side-composition)).
+
+| Method | Backend path | Wrapper (`endpoints.ts`) | Hook | Used by |
+| ------ | ------------ | ------------------------ | ---- | ------- |
 | GET | `/health` | `getHealth()` / `prewarm()` | `useHealth` | HealthWidget, keep-warm |
 | GET | `/api/v1/models` | `getModels()` | `useModels` | both model selectors |
 | GET | `/api/v1/models/{id}` | `getModel(id)` | _(none yet)_ | available helper |
-| POST | `/api/v1/tokenize` | `tokenize(body)` | `useTokenize` | TokenizerPage |
-| POST | `/api/v1/compare` | `compare(body)` | `useCompare` | ComparePage |
+| POST | `/api/v1/tokenize` | `tokenize(body)` | `useTokenize` | TokenizerPage; **also the building block for both compares** |
+| _(client-side)_ | N× `POST /api/v1/tokenize` | `compare(body)` | `useCompare` | ComparePage — "Across models" mode |
+| _(client-side)_ | N× `POST /api/v1/tokenize` | `comparePrompts(body)` | `useComparePrompts` | ComparePage — "Across prompts" mode |
+
+> **Changed in `7e0b235`:** the client no longer calls a `POST /api/v1/compare`
+> endpoint. `compare()` was rewritten to fan out `/tokenize` calls so it can also
+> collect each model's `estimated_input_cost` (which `/compare` did not return).
+> See the [issues log](./issues-and-recommendations.md) for the fan-out
+> concurrency note.
 
 ---
 
@@ -148,6 +160,7 @@ Tokenize one text with one model.
 ```jsonc
 {
   "model": "gpt-5",
+  "resolved_tokenizer": "o200k_base",  // tokenizer the backend resolved this model to (added 7e0b235)
   "token_count": 2,
   "word_count": 2,
   "character_count": 11,
@@ -163,40 +176,85 @@ Notes:
 - `tokens` and `token_ids` are positionally aligned — index `i` of one
   corresponds to index `i` of the other; the viewers and tables rely on this.
 - `estimated_input_cost` being `null` is a normal, expected state.
+- `resolved_tokenizer` (added in `7e0b235`) is what the compare features read to
+  show each model/prompt's actual tokenizer.
 
 ---
 
-### `POST /api/v1/compare`
+## Compare — client-side composition
 
-Tokenize the **same text across multiple models** in one request.
+Both comparison features are built **on top of `/tokenize`**, not on dedicated
+endpoints. Each fans out one `/tokenize` call per item via `Promise.all` and
+assembles the per-item results, capturing failures inline. This is what lets the
+UI rank by **estimated cost** as well as token count — `/tokenize` returns
+`estimated_input_cost`, which the abandoned `/compare` endpoint did not.
 
-**Request — `CompareRequest`:**
-
-```jsonc
-{
-  "models": ["gpt-5", "gpt-5-mini", "claude-3-5-sonnet"],
-  "text": "Hello world"
-}
+```mermaid
+flowchart TD
+    C["compare({models, text})"] -->|Promise.all| T1[POST /tokenize model₁,text]
+    C --> T2[POST /tokenize model₂,text]
+    C --> Tn[POST /tokenize modelₙ,text]
+    T1 & T2 & Tn --> A["assemble CompareResult[]<br/>(text_length = text.length)"]
 ```
 
-**Response — `CompareResponse`:**
+### `compare(body)` — one text, several models (`endpoints.ts`)
+
+**Input — `CompareRequest`:** `{ models: string[], text: string }`.
+
+For each model it calls `tokenize({ model, text })` and maps the response into a
+`CompareResult`:
 
 ```jsonc
 {
-  "text_length": 11,
+  "text_length": 11,                  // = body.text.length (computed client-side)
   "results": [
-    { "model": "gpt-5",       "resolved_tokenizer": "o200k_base", "token_count": 2,    "error": null },
-    { "model": "gpt-5-mini",  "resolved_tokenizer": "o200k_base", "token_count": 2,    "error": null },
-    { "model": "bad-model",   "resolved_tokenizer": null,         "token_count": null, "error": "MODEL_NOT_SUPPORTED" }
+    { "model": "gpt-5",      "resolved_tokenizer": "o200k_base", "token_count": 2,    "estimated_input_cost": 0.0000004, "cost_currency": "USD", "error": null },
+    { "model": "gpt-5-mini", "resolved_tokenizer": "o200k_base", "token_count": 2,    "estimated_input_cost": 0.0000002, "cost_currency": "USD", "error": null },
+    { "model": "bad-model",  "resolved_tokenizer": null,         "token_count": null, "estimated_input_cost": null,       "cost_currency": null,  "error": "Model not supported" }
   ]
 }
 ```
 
-**Partial-failure semantics are important:** a model that fails to tokenize
-comes back as a normal `CompareResult` entry with `token_count: null` and a
-populated `error`. The request as a whole still succeeds (HTTP 200). The
-`useCompare` hook's `onError` only fires on a **request-level** failure (network,
-validation, 5xx) — not on per-model errors (`useCompare.ts:11`).
+- A failed model's `error` is set to `normalizeApiError(error).message` (the
+  friendly message), and its `token_count`/cost fields are `null`.
+- `cost_currency` defaults to `null` when the backend omits it.
+
+### `comparePrompts(body)` — one model, several prompts (`endpoints.ts`)
+
+The mirror image: the **model is fixed and the prompts vary**.
+
+**Input — `ComparePromptsRequest`:** `{ model: string, prompts: string[] }`
+(typically two prompts).
+
+```jsonc
+{
+  "model": "gpt-5",
+  "resolved_tokenizer": "o200k_base",  // first non-null tokenizer seen across prompts
+  "results": [
+    { "index": 0, "text_length": 99, "word_count": 17, "token_count": 19, "estimated_input_cost": 0.0000019, "cost_currency": "USD", "error": null },
+    { "index": 1, "text_length": 38, "word_count": 6,  "token_count": 7,  "estimated_input_cost": 0.0000007, "cost_currency": "USD", "error": null }
+  ]
+}
+```
+
+- Each `PromptCompareResult` carries its 0-based `index`, `text_length`
+  (computed client-side as `text.length`), `word_count`, `token_count`, cost,
+  and an inline `error`.
+- `resolved_tokenizer` is the first non-null tokenizer seen (all prompts resolve
+  to the same tokenizer for a given model).
+
+### Partial-failure & error semantics (both)
+
+A per-item failure is captured **inline** (`token_count: null` + a populated
+`error`); the overall promise still resolves successfully. The `useCompare` /
+`useComparePrompts` hooks' `onError` only fires on a **request-level** failure
+(network, validation, etc.) — not on per-item errors
+(`useCompare.ts:11`, `useComparePrompts.ts`).
+
+> Because the fan-out uses `Promise.all`, **all** per-item `/tokenize` requests
+> fire concurrently (up to 10 for model comparison). See the
+> [issues log](./issues-and-recommendations.md) for the unbounded-concurrency
+> note.
 
 ---
 

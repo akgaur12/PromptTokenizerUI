@@ -81,16 +81,44 @@ asks for both (`include_tokens` + `include_token_ids`), so this usually means th
 backend didn't return that field; the viewer auto-falls-back to whichever data
 exists (`TokenViewer.tsx:28`).
 
+## Compare has two modes — "Across models" vs "Across prompts"
+
+The Compare page (added split in `7e0b235`) has a toggle at the top:
+
+- **Across models** — one text, ≥ 2 models. Validation: "Pick at least two
+  models".
+- **Across prompts** — one model, two prompts. Validation: "Pick a model" and
+  "Enter both prompts".
+
+Each mode keeps its own input, so switching tabs doesn't lose anything.
+
+## Compare fires many requests / is slow on a cold backend
+
+Each compare now sends **one `/tokenize` request per item** (up to 10 models, or
+2 prompts), fired concurrently via `Promise.all` (changed in `7e0b235`). On a
+sleeping free-tier backend the first batch can be slow while the dyno wakes. This
+is expected; there is currently no concurrency cap (see the
+[issues log](./issues-and-recommendations.md)).
+
 ## Compare: "Pick at least two models"
 
-Comparison requires ≥ 2 models (`ComparePage.tsx:28`). Select more.
+The across-models mode requires ≥ 2 models (`ComparePage.tsx`,
+`handleCompareModels`). Select more.
 
-## Compare: a model row says "Failed"
+## Compare: a model (or prompt) row says "Failed"
 
-That single model failed to tokenize (e.g. unsupported id). Other models still
+That single item failed to tokenize (e.g. unsupported id). Other items still
 show their counts; hover the "Failed" label to see the error. This is a
-**per-model** error inside `results[]`, not a request failure
-(`CompareResults.tsx:178`).
+**per-item** error inside `results[]`, not a request failure
+(`CompareResults.tsx`, `ComparePromptsResults.tsx`).
+
+## Compare: no "Best" highlight on mobile
+
+As of `7e0b235` the across-models table no longer draws a "Best" badge/row tint;
+the winner is shown only by the `vs best` column, which is **hidden on mobile**.
+So on small screens the most-efficient model has no explicit marker — read the
+(ascending) token counts instead. Tracked in the
+[issues log](./issues-and-recommendations.md).
 
 ## Compare selections lost when I navigate away
 

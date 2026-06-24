@@ -47,6 +47,7 @@ Components**, **API Integration**, and **State & Data Flow**.
 | 16 | [Performance Considerations](./16-performance.md) | Virtual caps, animation, caching, cold-start handling |
 | 17 | [Troubleshooting Guide](./17-troubleshooting.md) | Common failures and how to fix them |
 | 18 | [Glossary](./18-glossary.md) | Tokenization & project terminology |
+| — | [Issues & Recommendations](./issues-and-recommendations.md) | Known issues, severity, and recommended fixes |
 
 ---
 
@@ -58,10 +59,15 @@ Browser (this app)                         PromptTokenizer API (separate service
 │ React SPA (Vite build)      │  HTTP/JSON │ GET  /health                     │
 │  • Tokenizer page           │ ─────────► │ GET  /api/v1/models              │
 │  • Compare page             │            │ POST /api/v1/tokenize            │
-│  • React Query cache        │ ◄───────── │ POST /api/v1/compare             │
-│  • Axios client + error map │            └──────────────────────────────────┘
+│    (across models / prompts)│ ◄───────── │   (both compares fan out to this)│
+│  • React Query cache        │            └──────────────────────────────────┘
+│  • Axios client + error map │
 └─────────────────────────────┘
 ```
+
+> The Compare features have **no dedicated endpoint** — they fan out parallel
+> `POST /api/v1/tokenize` calls client-side (changed in `7e0b235`). See
+> [API Integration](./06-api-integration.md#compare--client-side-composition).
 
 - **Stack:** React 18, Vite 6, TypeScript 5.7, Tailwind CSS 3.4, shadcn/ui +
   Radix UI, TanStack React Query 5, Axios.
@@ -85,6 +91,24 @@ proxies `/api` and `/health` there automatically. See
 
 ---
 
-_Documentation generated from the actual implementation at commit `bbfc852`.
-When in doubt, the source is the source of truth — file references throughout
-this book are written as `path:line` and are clickable in most editors._
+_Documentation generated from the actual implementation; last reconciled against
+commit `7e0b235`. When in doubt, the source is the source of truth — file
+references throughout this book are written as `path:line` and are clickable in
+most editors._
+
+---
+
+## Changelog
+
+2026-06-14 — Documented the cost-comparison + prompt-to-prompt comparison feature (commit `7e0b235`).
+- Updated: 00-index.md — orientation diagram (compare no longer a backend endpoint), added Issues & Recommendations to TOC, added this changelog.
+- Updated: 01-overview.md — split the comparison feature into "across models" (now ranks by cost) and new "across prompts".
+- Updated: 02-architecture.md — hooks layer, compare flow description, and architectural-decisions table now reflect client-side `/tokenize` fan-out.
+- Updated: 04-project-structure.md — added `useComparePrompts.ts` and `ComparePromptsResults.tsx`; clarified compare hooks/pages.
+- Updated: 05-core-modules.md — rewrote ComparePage (two modes) and CompareResults (cost column, removed "Best" flag); documented new `ComparePromptsResults`.
+- Updated: 06-api-integration.md — endpoint catalog now lists compares as client-side; added "Compare — client-side composition" section; added `resolved_tokenizer` to `TokenizeResponse`.
+- Updated: 07-data-models.md — class diagram + types for `resolved_tokenizer`, `CompareResult` cost fields, and the new `ComparePrompts*` types; noted `Row.isBest` removal and `CompareMode`.
+- Updated: 08-state-and-data-flow.md — hooks table, dual-mode session, and both compare sequence diagrams (fan-out).
+- Updated: 17-troubleshooting.md — compare-is-N-requests note and prompt-mode entries.
+- Added: issues-and-recommendations.md — created the issues log; seeded pre-existing issues and added issues introduced by `7e0b235`.
+- Issues resolved: 0 | Issues added: 5

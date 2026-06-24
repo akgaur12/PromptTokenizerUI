@@ -40,7 +40,7 @@ graph TD
         UIkit["UI primitives (shadcn/ui)<br/>Button · Card · Popover · Command …"]
     end
     subgraph StateLayer["State / data-access layer"]
-        Hooks["React Query hooks<br/>useModels · useTokenize · useCompare · useHealth"]
+        Hooks["React Query hooks<br/>useModels · useTokenize · useCompare · useComparePrompts · useHealth"]
         Session["Local session state<br/>useCompareSession · useHashRoute"]
     end
     subgraph DataLayer["API access layer"]
@@ -151,11 +151,18 @@ sequenceDiagram
     end
 ```
 
-The Compare flow is analogous but uses `useCompare` → `POST /api/v1/compare`,
-and renders `CompareResults`. Crucially, **per-model failures in Compare are not
-errors** — they come back inside the `results[]` array with an `error` field, so
-the table shows successful models alongside failed ones
-(`src/hooks/useCompare.ts:11`).
+The Compare flows are analogous but **compose multiple `/tokenize` calls
+client-side** rather than hitting a single endpoint (changed in `7e0b235`):
+
+- **Across models** — `useCompare` → `compare()` fans out one `/tokenize` per
+  selected model (`Promise.all`) and renders `CompareResults`.
+- **Across prompts** — `useComparePrompts` → `comparePrompts()` fans out one
+  `/tokenize` per prompt for a single model and renders `ComparePromptsResults`.
+
+Crucially, **per-item failures are not errors** — they come back inside the
+`results[]` array with an `error` field, so the UI shows successful items
+alongside failed ones (`src/hooks/useCompare.ts:11`). See
+[API Integration](./06-api-integration.md#compare--client-side-composition).
 
 ## Architectural decisions (and why)
 
@@ -167,6 +174,7 @@ the table shows successful models alongside failed ones
 | **Defensive, mostly-optional types** | The UI tolerates payload drift and partial responses rather than crashing (`src/types/index.ts:5`). |
 | **Single shared hover tooltip** | One floating element instead of a Radix tooltip per token keeps thousands of token blocks renderable without jank (`HoverTooltip.tsx:17`). |
 | **Compare state hoisted to `<App>`** | Pages unmount on route change; hoisting preserves user input across navigation (`src/App.tsx:8`). |
+| **Compare composed from `/tokenize` (not `/compare`)** | `/tokenize` returns `estimated_input_cost`, so fanning out per-item calls lets the UI rank by **price** as well as token count — which the old `/compare` endpoint couldn't (added `7e0b235`, `src/api/endpoints.ts`). Trade-off: N requests instead of 1, fired concurrently — see the [issues log](./issues-and-recommendations.md). |
 | **Pre-warm before React mounts** | Overlaps the Render free-tier cold start with app init to cut perceived latency (`src/main.tsx:13`). |
 
 See [State & Data Flow](./08-state-and-data-flow.md) and

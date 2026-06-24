@@ -72,6 +72,13 @@ sequenceDiagram
 - **10-minute keep-warm poll** (incl. background) keeps the dyno awake while a
   tab is open (`useHealth.ts:14`).
 - **30s Axios timeout** bounds worst-case waits (`client.ts:15`).
+- **Compare fan-out (added `7e0b235`)** — `compare()` / `comparePrompts()` issue
+  **one `/tokenize` request per item** (up to 10 models, or 2 prompts) via
+  `Promise.all`, so a single compare can be N concurrent requests rather than 1.
+  This trades request volume for the ability to rank by cost. There is currently
+  **no concurrency cap**, which can amplify cold-start latency and rate-limiting
+  on a sleeping backend — tracked as ISSUE-001 in the
+  [issues log](./issues-and-recommendations.md).
 
 ## 4. Caching
 

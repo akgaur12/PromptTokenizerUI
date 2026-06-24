@@ -49,8 +49,8 @@ Resolution rules:
 | Surface | Mechanism | File |
 | ------- | --------- | ---- |
 | Tokenize failure | `toast.error(title, message)` in mutation `onError` | `useTokenize.ts:24` |
-| Compare request failure | same | `useCompare.ts:26` |
-| Per-model compare failure | inline "Failed" row + `title` tooltip with the error string | `CompareResults.tsx:178` |
+| Compare request failure (either mode) | same | `useCompare.ts:26`, `useComparePrompts.ts` |
+| Per-item compare failure (model or prompt) | inline "Failed" cell/indicator + `title` tooltip with the error string | `CompareResults.tsx`, `ComparePromptsResults.tsx` |
 | Models load failure | inline error box + **Retry** button | `ModelSelector.tsx:40`, `MultiModelSelector.tsx:66` |
 | Health unreachable | red status dot + "API may be offline" hint | `HealthWidget.tsx:79` |
 | Copy failure | `toast.error("Couldn't copy …")` | `TokenBlocks.tsx`, `copy-button.tsx` |

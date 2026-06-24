@@ -39,15 +39,34 @@ Key behaviors:
 
 ### `ComparePage` — `src/pages/ComparePage.tsx`
 
-Multi-model comparison. Receives its state via the `session` prop (hoisted to
-`<App>`), not local `useState`, so it survives navigation.
+Comparison page with **two modes** selected by a tablist toggle ("Across models"
+/ "Across prompts"), added in `7e0b235`. Receives all its state via the
+`session` prop (hoisted to `<App>`), not local `useState`, so it survives
+navigation. The intro copy and rendered body switch on `session.mode`.
+
+**Mode: "Across models"** — one text, several models (which tokenizer is most
+efficient?):
 
 - Requires **≥ 2 models**; otherwise shows a toast and aborts
-  (`ComparePage.tsx:28`).
-- Caps selection at **`MAX_MODELS = 10`**.
+  (`handleCompareModels`, `ComparePage.tsx`).
+- Caps selection at **`MAX_MODELS = 10`** via `MultiModelSelector`.
 - Reuses `PromptInput` with customized labels (`actionLabel="Compare"`,
   `loadingLabel="Comparing…"`).
 - Renders `CompareResults` with the model catalog so it can show friendly names.
+
+**Mode: "Across prompts"** — one model, two prompts (which prompt costs fewer
+tokens?), added `7e0b235`:
+
+- A single `ModelSelector` picks the model (defaults to `gpt-5`).
+- Two side-by-side prompt textareas, rendered by the local **`PromptColumn`**
+  sub-component (label + live char count + a `resize-y` `Textarea`). Note this
+  mode does **not** reuse `PromptInput`, so there is no ⌘/Ctrl+Enter submit here.
+- `handleComparePrompts` validates that a model is chosen and **both** prompts
+  are non-empty (separate toasts otherwise), then calls
+  `promptsMutation.mutate({ model, prompts: [promptA, promptB] })`.
+- "Try a sample" fills two contrasting sample prompts (`SAMPLE_A`/`SAMPLE_B`);
+  "Clear" empties both and resets the mutation.
+- Renders `ComparePromptsResults` with the model catalog.
 
 ---
 
@@ -224,21 +243,49 @@ make spaces/newlines/tabs legible.
 
 ### `CompareResults` — `src/components/CompareResults/CompareResults.tsx`
 
-Ranked side-by-side table of token counts across models.
+Ranked side-by-side table of token counts (and, since `7e0b235`, **estimated
+cost**) across models. Title: "Token & price comparison".
 
 - **Props:** `{ data?: CompareResponse; isLoading: boolean; models?: Model[] }`.
 - Builds `Row[]` (memoized) from `data.results`:
   - Successful rows (`token_count` is a number and no `error`) are sorted
     ascending (most efficient first); failed rows sink to the bottom via
-    `Infinity` sort key (`CompareResults.tsx:53`).
+    `Infinity` sort key (`CompareResults.tsx`).
   - `rank` is 1-based among successful rows; `deltaPct` is `% more tokens than
-    the minimum`; the row equal to `min` (when there's a spread) is flagged
-    `isBest`.
+    the minimum`. Each row also carries `cost` (`estimated_input_cost`) and
+    `currency` (`cost_currency ?? "USD"`).
   - `name` is resolved from the `models` catalog, falling back to the raw id.
 - Failed models show a red "Failed" indicator with the error message as a
   `title` tooltip.
 - Columns: `#`, `Model`, `Tokenizer` (hidden on mobile, shown inline instead),
-  `Tokens`, `vs best`. A legend explains the `vs best` column.
+  `Tokens`, **`Est. cost`** (formatted via `formatCost`, `—` when unavailable),
+  and `vs best` (now **hidden on mobile**). A legend explains the `Est. cost`
+  and `vs best` columns.
+
+> **Changed in `7e0b235`:** the per-row **"Best" badge and the `bg-success/5`
+> row highlight were removed**. The winner is now indicated only by the `vs best`
+> column showing "best" — which is hidden on mobile, so on small screens there is
+> no explicit best-row marker (see the [issues log](./issues-and-recommendations.md)).
+
+### `ComparePromptsResults` — `src/components/CompareResults/ComparePromptsResults.tsx`
+
+Added in `7e0b235`. The **mirror** of `CompareResults`: holds the model fixed and
+varies the prompts, rendering each prompt as a **card in a grid** (not a table
+row). Title: "Prompt comparison".
+
+- **Props:** `{ data?: ComparePromptsResponse; isLoading: boolean; models?:
+  Model[]; labels?: string[] }`. `labels` defaults to
+  `["Prompt A", "Prompt B", "Prompt C", "Prompt D"]`.
+- Computes `okCount` and `minTokens` across successful results (memoized).
+- Each card shows the prompt's token count (large), and a meta row with
+  **est. cost** (`formatCost`), **word count**, and **char count**
+  (`text_length`).
+- The leanest prompt (`token_count === minTokens` when `okCount > 1`) is flagged
+  with a **"fewest tokens"** trophy and a `bg-success/5` tint; the others show
+  `+N tokens → +X%` relative to it.
+- Failed prompts render a red error indicator with the message as a `title`.
+- The header shows the resolved model name and a `resolved_tokenizer` badge;
+  empty/loading states mirror `CompareResults`.
 
 ---
 
