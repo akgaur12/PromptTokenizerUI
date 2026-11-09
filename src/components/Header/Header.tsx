@@ -14,10 +14,12 @@ const NAV_ITEMS = [
   {
     href: "#/",
     label: "Tokenize",
-    match: (r: string) => !r.startsWith("/compare") && !r.startsWith("/pii"),
+    match: (r: string) =>
+      !r.startsWith("/compare") && !r.startsWith("/pii") && !r.startsWith("/scan"),
   },
   { href: "#/compare", label: "Compare", match: (r: string) => r.startsWith("/compare") },
   { href: "#/pii", label: "Redact PII", match: (r: string) => r.startsWith("/pii") },
+  { href: "#/scan", label: "Scan", match: (r: string) => r.startsWith("/scan") },
 ];
 
 function MediumIcon({ className }: { className?: string }) {
