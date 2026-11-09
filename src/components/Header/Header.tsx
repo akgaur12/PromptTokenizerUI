@@ -11,8 +11,13 @@ import { useHashRoute } from "@/hooks/useHashRoute";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "#/", label: "Tokenize", match: (r: string) => !r.startsWith("/compare") },
+  {
+    href: "#/",
+    label: "Tokenize",
+    match: (r: string) => !r.startsWith("/compare") && !r.startsWith("/pii"),
+  },
   { href: "#/compare", label: "Compare", match: (r: string) => r.startsWith("/compare") },
+  { href: "#/pii", label: "Redact PII", match: (r: string) => r.startsWith("/pii") },
 ];
 
 function MediumIcon({ className }: { className?: string }) {
