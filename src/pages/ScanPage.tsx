@@ -139,7 +139,7 @@ export function ScanPage() {
         </section>
 
         <Card>
-          <CardContent className="space-y-5 p-5 sm:p-6">
+          <CardContent className="space-y-5 p-4 sm:p-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-bold">What to look for</Label>
@@ -175,7 +175,7 @@ export function ScanPage() {
                     placeholder="Add your own phrase to flag…"
                     maxLength={100}
                     aria-label="Custom phrase"
-                    className="h-9 w-full rounded-md sm:h-8 sm:w-64 border bg-background px-2 text-xs outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="h-9 w-full rounded-md border bg-background px-2 text-base outline-none sm:h-8 sm:w-64 sm:text-xs focus-visible:ring-1 focus-visible:ring-ring"
                   />
                   <Button size="sm" variant="secondary" onClick={submitPhrase} disabled={!phraseInput.trim()}>
                     <Plus />
@@ -251,7 +251,7 @@ export function ScanPage() {
         </Card>
 
         <Card>
-          <CardContent className="space-y-3 p-5 sm:p-6">
+          <CardContent className="space-y-3 p-4 sm:p-6">
             {text && (
               <div
                 role="status"

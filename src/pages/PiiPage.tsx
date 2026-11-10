@@ -80,7 +80,7 @@ export function PiiPage() {
         </section>
 
         <Card>
-          <CardContent className="space-y-5 p-5 sm:p-6">
+          <CardContent className="space-y-5 p-4 sm:p-6">
             {/* 1. Choose what to remove */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -248,7 +248,7 @@ export function PiiPage() {
 
         {/* 3. Result — redacted text with clickable inline highlights */}
         <Card>
-          <CardContent className="space-y-3 p-5 sm:p-6">
+          <CardContent className="space-y-3 p-4 sm:p-6">
             <div className="flex items-center justify-between gap-2">
               <Label className="flex items-center gap-2 text-sm font-bold">
                 <ShieldCheck className="size-4" />
@@ -356,7 +356,7 @@ function CustomRuleForm({
   }
 
   const inputCls =
-    "h-8 rounded-md border bg-background px-2 text-xs outline-none focus-visible:ring-1 focus-visible:ring-ring";
+    "h-9 rounded-md border bg-background px-2 text-base outline-none sm:h-8 sm:text-xs focus-visible:ring-1 focus-visible:ring-ring";
 
   return (
     <div className="space-y-2 rounded-lg border border-dashed p-3">
