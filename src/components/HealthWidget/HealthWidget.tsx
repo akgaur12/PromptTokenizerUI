@@ -78,7 +78,7 @@ export function HealthWidget() {
 
         {isError && (
           <p className="mt-3 text-xs text-muted-foreground">
-            Couldn't reach <code className="font-mono">/health</code>. The API
+            Couldn't reach <code className="font-mono">/api/v1/status</code>. The API
             may be offline.
           </p>
         )}

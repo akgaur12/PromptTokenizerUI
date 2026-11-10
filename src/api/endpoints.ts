@@ -14,21 +14,21 @@ import type {
   TokenizeResponse,
 } from "@/types";
 
-/** GET /health */
+/** GET /api/v1/status (avoids ad-blocker rules that match "/health") */
 export async function getHealth(): Promise<HealthResponse> {
-  const { data } = await apiClient.get<HealthResponse>("/health");
+  const { data } = await apiClient.get<HealthResponse>(`${API_PREFIX}/status`);
   return data;
 }
 
 /**
- * Fire-and-forget ping to /health to wake a sleeping Render free-tier dyno as
+ * Fire-and-forget ping to /api/v1/status to wake a sleeping Render free-tier dyno as
  * early as possible (before React mounts). Errors are swallowed — this only
  * exists to start the cold-start spin-up sooner; the HealthWidget reflects the
  * real status once the app renders.
  */
 export function prewarm(): void {
   try {
-    void fetch(`${API_BASE_URL}/health`, {
+    void fetch(`${API_BASE_URL}${API_PREFIX}/status`, {
       method: "GET",
       keepalive: true,
       cache: "no-store",
