@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Boxes, Eraser, Loader2, Minimize2 } from "lucide-react";
+import { CompressContent } from "@/components/CompressContent/CompressContent";
 import { Header } from "@/components/Header/Header";
 import { ModelSelector } from "@/components/ModelSelector/ModelSelector";
 import { Card, CardContent } from "@/components/ui/card";
@@ -347,6 +348,9 @@ export function CompressPage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Static, crawlable explainer — mirrors the tokenizer page's landing copy */}
+        <CompressContent />
       </main>
     </div>
   );

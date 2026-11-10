@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Eraser, ShieldCheck, Boxes, Plus, X, Pencil } from "lucide-react";
 import { Header } from "@/components/Header/Header";
+import { PiiContent } from "@/components/PiiContent/PiiContent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -305,6 +306,9 @@ export function PiiPage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Static, crawlable explainer — mirrors the other tool pages */}
+        <PiiContent />
       </main>
     </div>
   );

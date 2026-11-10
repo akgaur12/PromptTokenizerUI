@@ -1,4 +1,5 @@
 import { Boxes, GitCompare, Layers } from "lucide-react";
+import { CompareContent } from "@/components/CompareContent/CompareContent";
 import { Header } from "@/components/Header/Header";
 import { MultiModelSelector } from "@/components/ModelSelector/MultiModelSelector";
 import { ModelSelector } from "@/components/ModelSelector/ModelSelector";
@@ -245,6 +246,9 @@ export function ComparePage({ session }: ComparePageProps) {
             />
           </>
         )}
+
+        {/* Short, crawlable explainer — mirrors the other tool pages */}
+        <CompareContent />
       </main>
 
       <footer className="border-t py-6">

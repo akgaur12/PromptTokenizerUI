@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { AlertTriangle, Boxes, Eraser, Plus, ShieldAlert, ShieldCheck, X } from "lucide-react";
 import { Header } from "@/components/Header/Header";
+import { ScanContent } from "@/components/ScanContent/ScanContent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -321,6 +322,9 @@ export function ScanPage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Static, crawlable explainer — mirrors the other tool pages */}
+        <ScanContent />
       </main>
     </div>
   );
