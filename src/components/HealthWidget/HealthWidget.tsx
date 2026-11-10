@@ -16,6 +16,8 @@ export function HealthWidget() {
   const healthy = isHealthy(data) && !isError;
   const { rssMb, vmsMb } = readMemory(data);
 
+  const statusLabel = isLoading ? "Checking…" : healthy ? "Healthy" : "Offline";
+
   const dotClass = isLoading
     ? "bg-muted-foreground"
     : healthy
@@ -26,10 +28,10 @@ export function HealthWidget() {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          aria-label="Service status"
+          variant="ghost"
+          size="icon"
+          title={`Service status: ${statusLabel}`}
+          aria-label={`Service status: ${statusLabel}`}
         >
           <span className="relative flex h-2 w-2">
             {healthy && !isLoading && (
@@ -41,9 +43,6 @@ export function HealthWidget() {
                 dotClass,
               )}
             />
-          </span>
-          <span className="hidden sm:inline">
-            {isLoading ? "Checking…" : healthy ? "Healthy" : "Offline"}
           </span>
         </Button>
       </PopoverTrigger>

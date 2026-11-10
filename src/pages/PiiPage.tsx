@@ -106,7 +106,7 @@ export function PiiPage() {
                       title={`e.g. ${t.example}`}
                       onClick={() => toggle(t.id)}
                       className={cn(
-                        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors",
+                        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors sm:py-1",
                         on
                           ? "border-primary bg-primary/10 text-foreground"
                           : "text-muted-foreground hover:bg-muted",
@@ -367,7 +367,7 @@ function CustomRuleForm({
           placeholder="Name, e.g. Employee ID"
           maxLength={30}
           aria-label="Pattern name"
-          className={cn(inputCls, "w-44")}
+          className={cn(inputCls, "w-full sm:w-44")}
         />
         <div className="flex overflow-hidden rounded-md border text-xs">
           {(["words", "regex"] as const).map((m) => (
@@ -392,7 +392,7 @@ function CustomRuleForm({
           placeholder={mode === "words" ? "Project Phoenix, Acme Corp" : "EMP-\\d{4,6}"}
           maxLength={MAX_PATTERN_LENGTH}
           aria-label="Pattern"
-          className={cn(inputCls, "min-w-48 flex-1 font-mono")}
+          className={cn(inputCls, "min-w-0 flex-1 basis-full font-mono sm:basis-48")}
         />
         <Button size="sm" onClick={submit} disabled={!label.trim() || !pattern.trim() || !!error}>
           {rule ? "Save" : "Add"}

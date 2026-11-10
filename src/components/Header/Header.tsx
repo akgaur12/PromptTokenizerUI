@@ -42,46 +42,48 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="flex h-16 items-center justify-between gap-2 sm:gap-5">
-          <div className="flex min-w-0 items-center gap-2 sm:gap-5">
-            {/* Logo — compact square icon on mobile, full banner on sm+ */}
-            <a href="#/" aria-label="PromptTokenizer home" className="shrink-0">
-              <img
-                src="/favicon.svg"
-                alt="PromptTokenizer logo"
-                className="h-9 w-9 rounded-lg sm:hidden"
-              />
-              <img
-                src="/banner.png"
-                alt="PromptTokenizer logo"
-                className="hidden h-14 w-auto rounded-xl sm:block"
-              />
-            </a>
+        {/* Mobile: logo + icons on row 1, nav scrolls on row 2. sm+: one row. */}
+        <div className="flex flex-wrap items-center gap-x-2 py-2 sm:h-16 sm:flex-nowrap sm:gap-5 sm:py-0">
+          {/* Logo — compact square icon on mobile, full banner on sm+ */}
+          <a href="#/" aria-label="PromptTokenizer home" className="shrink-0">
+            <img
+              src="/favicon.svg"
+              alt="PromptTokenizer logo"
+              className="h-9 w-9 rounded-lg sm:hidden"
+            />
+            <img
+              src="/banner.png"
+              alt="PromptTokenizer logo"
+              className="hidden h-14 w-auto rounded-xl sm:block"
+            />
+          </a>
 
-            {/* Navigation — inline beside the logo */}
-            <nav className="flex items-center gap-0.5 sm:gap-1">
-              {NAV_ITEMS.map((item) => {
-                const active = item.match(route);
-                return (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "rounded-md px-2 py-1.5 text-sm font-medium transition-colors sm:px-3",
-                      active
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    {item.label}
-                  </a>
-                );
-              })}
-            </nav>
-          </div>
+          {/* Navigation — own scrollable row on mobile, inline beside the logo on sm+ */}
+          <nav
+            aria-label="Main"
+            className="order-last -mx-4 flex basis-full items-center gap-1 overflow-x-auto px-4 pt-1 [scrollbar-width:none] sm:order-none sm:mx-0 sm:basis-auto sm:px-0 sm:pt-0 [&::-webkit-scrollbar]:hidden"
+          >
+            {NAV_ITEMS.map((item) => {
+              const active = item.match(route);
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
+          </nav>
 
-          <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
           <HealthWidget />
           <Tooltip>
             <TooltipTrigger asChild>

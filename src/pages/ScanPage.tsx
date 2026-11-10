@@ -99,7 +99,7 @@ export function ScanPage() {
         title={`e.g. ${example}`}
         onClick={() => toggle(id)}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors",
+          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors sm:py-1",
           on ? "border-primary bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted",
         )}
       >
@@ -175,7 +175,7 @@ export function ScanPage() {
                     placeholder="Add your own phrase to flag…"
                     maxLength={100}
                     aria-label="Custom phrase"
-                    className="h-8 w-64 max-w-full rounded-md border bg-background px-2 text-xs outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="h-9 w-full rounded-md sm:h-8 sm:w-64 border bg-background px-2 text-xs outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   />
                   <Button size="sm" variant="secondary" onClick={submitPhrase} disabled={!phraseInput.trim()}>
                     <Plus />
